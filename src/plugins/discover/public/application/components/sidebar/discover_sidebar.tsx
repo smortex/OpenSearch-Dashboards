@@ -40,7 +40,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { IndexPattern, IndexPatternField, UI_SETTINGS } from '../../../../../data/public';
+import { IndexPattern, IndexPatternField } from '../../../../../data/public';
 import { FIELDS_LIMIT_SETTING } from '../../../../common';
 import { getServices } from '../../../opensearch_dashboards_services';
 import { DiscoverField } from './discover_field';
@@ -140,7 +140,6 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
   );
 
   const popularLimit = services.uiSettings.get(FIELDS_LIMIT_SETTING);
-  const shortDotsEnabled = services.uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
 
   const {
     selected: selectedFields,
@@ -242,7 +241,6 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
                   category="selected"
                   fields={selectedFields}
                   getDetailsByField={getDetailsByField}
-                  shortDotsEnabled={shortDotsEnabled}
                   title={i18n.translate('discover.fieldChooser.filter.selectedFieldsTitle', {
                     defaultMessage: 'Selected fields',
                   })}
@@ -253,7 +251,6 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
                     category="popular"
                     fields={popularFields}
                     getDetailsByField={getDetailsByField}
-                    shortDotsEnabled={shortDotsEnabled}
                     title={i18n.translate('discover.fieldChooser.filter.popularTitle', {
                       defaultMessage: 'Popular fields',
                     })}
@@ -264,7 +261,6 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
                   category="unpopular"
                   fields={unpopularFields}
                   getDetailsByField={getDetailsByField}
-                  shortDotsEnabled={shortDotsEnabled}
                   title={i18n.translate('discover.fieldChooser.filter.availableFieldsTitle', {
                     defaultMessage: 'Available fields',
                   })}

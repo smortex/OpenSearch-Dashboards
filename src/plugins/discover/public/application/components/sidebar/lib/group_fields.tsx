@@ -63,10 +63,10 @@ export function groupFields(
     .slice(0, popularLimit);
 
   const compareFn = (a: IndexPatternField, b: IndexPatternField) => {
-    if (!a.displayName) {
+    if (!a.fullName) {
       return 0;
     }
-    return a.displayName.localeCompare(b.displayName || '');
+    return a.fullName.localeCompare(b.fullName || '');
   };
   const fieldsSorted = fields.sort(compareFn);
 

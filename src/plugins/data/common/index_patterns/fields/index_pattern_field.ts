@@ -32,16 +32,15 @@ import { OsdFieldType, getOsdFieldOverrides, getOsdFieldType } from '../../osd_f
 import { OSD_FIELD_TYPES } from '../../osd_field_types/types';
 import { IFieldType } from './types';
 import { FieldSpec, IndexPattern } from '../..';
+import { shortenDottedString } from '../../utils';
 
 export class IndexPatternField implements IFieldType {
   readonly spec: FieldSpec;
   // not writable or serialized
-  readonly displayName: string;
   private readonly osdFieldType: OsdFieldType;
 
-  constructor(spec: FieldSpec, displayName: string) {
+  constructor(spec: FieldSpec) {
     this.spec = { ...spec, type: spec.name === '_source' ? '_source' : spec.type };
-    this.displayName = displayName;
 
     this.osdFieldType = getOsdFieldType(spec.type);
   }
@@ -80,6 +79,14 @@ export class IndexPatternField implements IFieldType {
     this.spec.lang = lang;
   }
 
+  public get customLabel() {
+    return this.spec.customLabel;
+  }
+
+  public set customLabel(customLabel) {
+    this.spec.customLabel = customLabel;
+  }
+
   /**
    * Description of field type conflicts across different indices in the same index pattern
    */
@@ -93,6 +100,32 @@ export class IndexPatternField implements IFieldType {
 
   // read only attrs
   public get name() {
+    return this.spec.name;
+  }
+
+  public get fullName(): string {
+    let res;
+    if (this.spec.shortDotsEnable) {
+      res = shortenDottedString(this.spec.name);
+    } else {
+      res = this.spec.name;
+    }
+
+    if (this.spec.customLabel) {
+      res += ` (${this.spec.customLabel})`;
+    }
+    return res;
+  }
+
+  public get displayName(): string {
+    if (this.spec.customLabel) {
+      return this.spec.customLabel;
+    }
+
+    if (this.spec.shortDotsEnable) {
+      return shortenDottedString(this.spec.name);
+    }
+
     return this.spec.name;
   }
 
@@ -163,6 +196,8 @@ export class IndexPatternField implements IFieldType {
       aggregatable: this.aggregatable,
       readFromDocValues: this.readFromDocValues,
       subType: this.subType,
+      customLabel: this.customLabel,
+      fullName: this.fullName,
     };
   }
 
@@ -185,6 +220,9 @@ export class IndexPatternField implements IFieldType {
       readFromDocValues: this.readFromDocValues,
       subType: this.subType,
       format: getFormatterForField ? getFormatterForField(this).toJSON() : undefined,
+      customLabel: this.customLabel,
+      fullName: this.fullName,
+      shortDotsEnable: this.spec.shortDotsEnable,
     };
   }
 }

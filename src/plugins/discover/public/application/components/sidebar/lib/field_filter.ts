@@ -84,7 +84,9 @@ export function isFieldFiltered(
     field.scripted ||
     fieldCounts[field.name] > 0;
   const matchName =
-    !filterState.name || field.name.toLowerCase().indexOf(filterState.name.toLowerCase()) !== -1; // case insensitive matching name
+    !filterState.name ||
+    field.name.toLowerCase().indexOf(filterState.name.toLowerCase()) !== -1 ||
+    field.displayName.toLowerCase().indexOf(filterState.name.toLowerCase()) !== -1; // case insensitive matching name
 
   return matchFilter && isAggregatable && isSearchable && scriptedOrMissing && matchName;
 }

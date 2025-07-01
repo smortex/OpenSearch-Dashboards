@@ -136,6 +136,7 @@ export interface FieldEditorState {
   errors?: string[];
   format: any;
   spec: IndexPatternField['spec'];
+  customLabel: string;
 }
 
 export interface FieldEdiorProps {
@@ -177,6 +178,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       isSaving: false,
       format: props.indexPattern.getFormatterForField(spec),
       spec: { ...spec },
+      customLabel: '',
     };
     this.supportedLangs = getSupportedScriptingLanguages();
     this.deprecatedLangs = getDeprecatedScriptingLanguages();
@@ -221,6 +223,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       ),
       fieldFormatId: get(indexPattern, ['fieldFormatMap', spec.name, 'type', 'id']),
       fieldFormatParams: format.params(),
+      customLabel: spec.customLabel || '',
     });
   }
 
@@ -344,6 +347,33 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         />
       </EuiCompressedFormRow>
     ) : null;
+  }
+
+  renderCustomLabel() {
+    const { customLabel, spec } = this.state;
+
+    return (
+      <EuiCompressedFormRow
+        label={i18n.translate('indexPatternManagement.customLabel', {
+          defaultMessage: 'Custom label',
+        })}
+        helpText={
+          <FormattedMessage
+            id="indexPatternManagement.customLabelHelpText"
+            defaultMessage="Set a custom label to use when this field is displayed in Discover and Visualize. Queries and filters don't currently support a custom label and will use the original field name."
+          />
+        }
+      >
+        <EuiCompressedFieldText
+          value={customLabel || ''}
+          placeholder={spec.name}
+          data-test-subj="editorFieldCustomLabel"
+          onChange={(e) => {
+            this.setState({ customLabel: e.target.value });
+          }}
+        />
+      </EuiCompressedFormRow>
+    );
   }
 
   renderLanguage() {
@@ -788,7 +818,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
   saveField = async () => {
     const field = this.state.spec;
     const { indexPattern } = this.props;
-    const { fieldFormatId } = this.state;
+    const { fieldFormatId, customLabel } = this.state;
 
     if (field.scripted) {
       this.setState({
@@ -828,6 +858,11 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       indexPattern.fieldFormatMap[field.name] = undefined;
     } else {
       indexPattern.fieldFormatMap[field.name] = field.format;
+    }
+
+    if (field.customLabel !== customLabel) {
+      field.customLabel = customLabel;
+      indexPattern.fields.update(field);
     }
 
     return saveIndexPattern(indexPattern)
@@ -889,6 +924,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
         <EuiForm>
           {this.renderScriptingPanels()}
           {this.renderName()}
+          {this.renderCustomLabel()}
           {this.renderLanguage()}
           {this.renderType()}
           {this.renderTypeConflict()}

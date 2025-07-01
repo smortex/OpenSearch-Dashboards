@@ -84,6 +84,7 @@ export class IndexedFieldsTable extends Component<
           return {
             ...field.spec,
             displayName: field.displayName,
+            fullName: field.fullName,
             format: getFieldFormat(indexPattern, field.name),
             excluded: fieldWildcardMatch ? fieldWildcardMatch(field.name) : false,
             info: helpers.getFieldInfo && helpers.getFieldInfo(indexPattern, field),
@@ -101,7 +102,11 @@ export class IndexedFieldsTable extends Component<
     (fields, fieldFilter, indexedFieldTypeFilter) => {
       if (fieldFilter) {
         const normalizedFieldFilter = fieldFilter.toLowerCase();
-        fields = fields.filter((field) => field.name.toLowerCase().includes(normalizedFieldFilter));
+        fields = fields.filter(
+          (field) =>
+            field.name.toLowerCase().includes(normalizedFieldFilter) ||
+            field.displayName.toLowerCase().includes(normalizedFieldFilter)
+        );
       }
 
       if (indexedFieldTypeFilter) {

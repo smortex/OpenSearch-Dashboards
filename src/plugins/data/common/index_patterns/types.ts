@@ -64,6 +64,11 @@ export interface IndexPatternAttributes {
   intervalName?: string;
   sourceFilters?: string;
   fieldFormatMap?: string;
+  fieldAttrs?: string;
+}
+
+export interface FieldAttrs {
+  [key: string]: { customLabel: string };
 }
 
 export type OnNotification = (toastInputFields: ToastInputFields) => void;
@@ -185,6 +190,9 @@ export interface FieldSpec {
   readFromDocValues?: boolean;
   subType?: IFieldSubType;
   indexed?: boolean;
+  customLabel?: string;
+  // not persisted
+  shortDotsEnable?: boolean;
 }
 
 export type IndexPatternFieldMap = Record<string, FieldSpec>;
@@ -208,6 +216,7 @@ export interface IndexPatternSpec {
   type?: string;
   dataSourceRef?: SavedObjectReference;
   fieldsLoading?: boolean;
+  fieldAttrs?: FieldAttrs;
 }
 
 export interface SourceFilter {

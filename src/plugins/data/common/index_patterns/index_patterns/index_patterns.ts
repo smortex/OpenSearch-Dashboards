@@ -46,6 +46,7 @@ import {
   GetFieldsOptions,
   IndexPatternSpec,
   IndexPatternAttributes,
+  FieldAttrs,
   FieldSpec,
   FieldFormatMap,
   IndexPatternFieldMap,
@@ -321,7 +322,11 @@ export class IndexPatternsService {
 
       const fields = await this.getFieldsForIndexPattern(indexPatternCopy);
       const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
-      indexPattern.fields.replaceAll([...fields, ...scripted]);
+      const fieldAttrs = indexPattern.getFieldAttrs();
+      const fieldsWithSavedAttrs = Object.values(
+        this.fieldArrayToMap([...fields, ...scripted], fieldAttrs)
+      );
+      indexPattern.fields.replaceAll(fieldsWithSavedAttrs);
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
@@ -347,12 +352,13 @@ export class IndexPatternsService {
     fields: IndexPatternFieldMap,
     id: string,
     title: string,
-    options: GetFieldsOptions
+    options: GetFieldsOptions,
+    fieldAttrs: FieldAttrs = {}
   ) => {
     const scriptdFields = Object.values(fields).filter((field) => field.scripted);
     try {
-      const newFields = await this.getFieldsForWildcard(options);
-      return this.fieldArrayToMap([...newFields, ...scriptdFields]);
+      const newFields = (await this.getFieldsForWildcard(options)) as FieldSpec[];
+      return this.fieldArrayToMap([...newFields, ...scriptdFields], fieldAttrs);
     } catch (err) {
       if (err instanceof IndexPatternMissingIndices) {
         this.onNotification({ title: (err as any).message, color: 'danger', iconType: 'alert' });
@@ -387,9 +393,9 @@ export class IndexPatternsService {
    * Converts field array to map
    * @param fields
    */
-  fieldArrayToMap = (fields: FieldSpec[]) =>
+  fieldArrayToMap = (fields: FieldSpec[], fieldAttrs?: FieldAttrs) =>
     fields.reduce<IndexPatternFieldMap>((collector, field) => {
-      collector[field.name] = field;
+      collector[field.name] = { ...field, customLabel: fieldAttrs?.[field.name]?.customLabel };
       return collector;
     }, {});
 
@@ -413,6 +419,7 @@ export class IndexPatternsService {
         fieldFormatMap,
         typeMeta,
         type,
+        fieldAttrs,
       },
       references,
     } = savedObject;
@@ -422,6 +429,7 @@ export class IndexPatternsService {
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
     const parsedFields: FieldSpec[] = fields ? JSON.parse(fields) : [];
     const dataSourceRef = Array.isArray(references) ? references[0] : undefined;
+    const parsedFieldAttrs: FieldAttrs = fieldAttrs ? JSON.parse(fieldAttrs) : {};
 
     this.addFormatsToFields(parsedFields, parsedFieldFormatMap);
     return {
@@ -433,10 +441,11 @@ export class IndexPatternsService {
       intervalName,
       timeFieldName,
       sourceFilters: parsedSourceFilters,
-      fields: this.fieldArrayToMap(parsedFields),
+      fields: this.fieldArrayToMap(parsedFields, parsedFieldAttrs),
       typeMeta: parsedTypeMeta,
       type,
       dataSourceRef,
+      fieldAttrs: parsedFieldAttrs,
     };
   };
 
@@ -468,6 +477,9 @@ export class IndexPatternsService {
 
     const spec = this.savedObjectToSpec(savedObject);
     const { title, type, typeMeta, dataSourceRef } = spec;
+    spec.fieldAttrs = savedObject.attributes.fieldAttrs
+      ? JSON.parse(savedObject.attributes.fieldAttrs)
+      : {};
     const parsedFieldFormats: FieldFormatMap = savedObject.attributes.fieldFormatMap
       ? JSON.parse(savedObject.attributes.fieldFormatMap)
       : {};
@@ -476,13 +488,19 @@ export class IndexPatternsService {
     let isSaveRequired = isFieldRefreshRequired;
     try {
       spec.fields = isFieldRefreshRequired
-        ? await this.refreshFieldSpecMap(spec.fields || {}, id, spec.title as string, {
-            pattern: title,
-            metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
-            type,
-            params: typeMeta && typeMeta.params,
-            dataSourceId: dataSourceRef?.id,
-          })
+        ? await this.refreshFieldSpecMap(
+            spec.fields || {},
+            id,
+            spec.title as string,
+            {
+              pattern: title as string,
+              metaFields: await this.config.get(UI_SETTINGS.META_FIELDS),
+              type,
+              params: typeMeta && typeMeta.params,
+              dataSourceId: dataSourceRef?.id,
+            },
+            spec.fieldAttrs
+          )
         : spec.fields;
     } catch (err) {
       isSaveRequired = false;

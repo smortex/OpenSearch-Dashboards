@@ -43,7 +43,6 @@ import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldIcon } from '../../../../../opensearch_dashboards_react/public';
 import { FieldDetails } from './types';
 import { IndexPatternField, IndexPattern } from '../../../../../data/public';
-import { shortenDottedString } from '../../helpers';
 import { getFieldTypeName } from './lib/get_field_type_name';
 import './discover_field.scss';
 
@@ -81,10 +80,6 @@ export interface DiscoverFieldProps {
    * Determines whether the field is selected
    */
   selected?: boolean;
-  /**
-   * Determines whether the field name is shortened test.sub1.sub2 = t.s.sub2
-   */
-  useShortDots?: boolean;
 }
 
 export const DiscoverField = ({
@@ -96,7 +91,6 @@ export const DiscoverField = ({
   indexPattern,
   onAddFilter,
   getDetails,
-  useShortDots,
 }: DiscoverFieldProps) => {
   const addLabelAria = i18n.translate('discover.fieldChooser.discoverField.addButtonAriaLabel', {
     defaultMessage: 'Add {field} to table',
@@ -138,7 +132,7 @@ export const DiscoverField = ({
         data-test-subj={`field-${field.name}`}
         className="dscSidebarField__name eui-textBreakWord"
       >
-        {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
+        {field.fullName || field.name}
       </span>
     </EuiToolTip>
   );

@@ -99,7 +99,8 @@ export function getLegacyDisplayedColumns(
     const field = indexPattern.getFieldByName(column);
     return {
       name: column,
-      displayName: isShortDots ? shortenDottedString(column) : column,
+      displayName:
+        (isShortDots ? shortenDottedString(column) : column) + ' from data_table_helper.tsx',
       isSortable: osdFieldOverrides.sortable ?? !!field?.sortable,
       isRemoveable: column !== '_source' || columns.length > 1,
       colLeftIdx: idx - 1 < 0 ? -1 : idx - 1,

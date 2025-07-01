@@ -42,6 +42,7 @@ export interface FieldMapping {
   rowCount?: number;
   type: string;
   name: string;
+  fullName?: string;
 }
 
 export type DocViewFilterFn = (

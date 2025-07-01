@@ -63,7 +63,7 @@ function FieldParamEditor({
 }: FieldParamEditorProps) {
   const [isDirty, setIsDirty] = useState(false);
   const selectedOptions: ComboBoxGroupedOptions<IndexPatternField> = value
-    ? [{ label: value.displayName || value.name, target: value }]
+    ? [{ label: value.fullName, target: value }]
     : [];
 
   const onChange = (options: EuiComboBoxOptionOption[]) => {

@@ -30,7 +30,6 @@
 
 import { getOsdFieldOverrides } from '../../../../../../plugins/data/common';
 import { IndexPattern } from '../../../opensearch_dashboards_services';
-import { shortenDottedString } from '../../helpers';
 
 export interface LegacyDisplayedColumn {
   name: string;
@@ -96,7 +95,7 @@ export function getLegacyDisplayedColumns(
     const field = indexPattern.getFieldByName(column);
     return {
       name: column,
-      displayName: isShortDots ? shortenDottedString(column) : column,
+      displayName: field ? field.displayName : column,
       isSortable: osdFieldOverrides.sortable ?? !!field?.sortable,
       isRemoveable: column !== '_source' || columns.length > 1,
       colLeftIdx: idx - 1 < 0 ? -1 : idx - 1,

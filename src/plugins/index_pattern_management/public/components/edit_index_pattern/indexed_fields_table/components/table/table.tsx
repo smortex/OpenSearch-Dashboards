@@ -231,7 +231,7 @@ export class Table extends PureComponent<IndexedFieldProps> {
 
     const columns: Array<EuiBasicTableColumn<IndexedFieldItem>> = [
       {
-        field: 'displayName',
+        field: 'fullName',
         name: nameHeader,
         dataType: 'string',
         sortable: true,

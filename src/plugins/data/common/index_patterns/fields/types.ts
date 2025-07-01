@@ -48,6 +48,8 @@ export interface IFieldType {
   scripted?: boolean;
   subType?: IFieldSubType;
   displayName?: string;
+  customLabel?: string;
+  fullName?: string;
   format?: any;
   toSpec?: (options?: { getFormatterForField?: IndexPattern['getFormatterForField'] }) => FieldSpec;
 }

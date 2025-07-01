@@ -29,7 +29,7 @@
  */
 
 import _, { each, reject } from 'lodash';
-import { FieldFormatsContentType, SavedObjectsClientCommon } from '../..';
+import { FieldAttrs, FieldFormatsContentType, SavedObjectsClientCommon } from '../..';
 import { DuplicateField } from '../../../../opensearch_dashboards_utils/common';
 
 import { SerializedFieldFormat } from '../../../../expressions/common';
@@ -58,6 +58,7 @@ interface IndexPatternDeps {
 }
 
 interface SavedObjectBody {
+  fieldAttrs?: string;
   title?: string;
   displayName?: string;
   description?: string;
@@ -103,6 +104,7 @@ export class IndexPattern implements IIndexPattern {
   private originalSavedObjectBody: SavedObjectBody = {};
   private shortDotsEnable: boolean = false;
   private fieldFormats: FieldFormatsStartCommon;
+  public fieldAttrs: FieldAttrs;
 
   constructor({
     spec = {},
@@ -146,6 +148,7 @@ export class IndexPattern implements IIndexPattern {
     });
     this.dataSourceRef = spec.dataSourceRef;
     this.fieldsLoading = spec.fieldsLoading;
+    this.fieldAttrs = spec.fieldAttrs || {};
   }
 
   /**
@@ -187,6 +190,20 @@ export class IndexPattern implements IIndexPattern {
       }
       return col;
     }, {});
+
+  getFieldAttrs = () => {
+    const newFieldAttrs = { ...this.fieldAttrs };
+
+    this.fields.forEach((field) => {
+      if (field.customLabel) {
+        newFieldAttrs[field.name] = { customLabel: field.customLabel };
+      } else {
+        delete newFieldAttrs[field.name];
+      }
+    });
+
+    return newFieldAttrs;
+  };
 
   getComputedFields() {
     const scriptFields: any = {};
@@ -242,6 +259,7 @@ export class IndexPattern implements IIndexPattern {
       typeMeta: this.typeMeta,
       type: this.type,
       dataSourceRef: this.dataSourceRef,
+      fieldAttrs: this.fieldAttrs,
     };
   }
 
@@ -370,8 +388,10 @@ export class IndexPattern implements IIndexPattern {
     };
     const serialized = _.transform(this.fieldFormatMap, serializeFieldFormatMap);
     const fieldFormatMap = _.isEmpty(serialized) ? undefined : JSON.stringify(serialized);
+    const fieldAttrs = this.getFieldAttrs();
 
     return {
+      fieldAttrs: fieldAttrs ? JSON.stringify(this.getFieldAttrs()) : undefined,
       title: this.title,
       displayName: this.displayName,
       description: this.description,

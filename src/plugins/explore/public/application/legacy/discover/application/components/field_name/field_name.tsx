@@ -56,7 +56,8 @@ export function FieldName({
   scripted = false,
 }: Props) {
   const typeName = getFieldTypeName(fieldType);
-  const displayName = useShortDots ? shortenDottedString(fieldName) : fieldName;
+  const displayName =
+    (useShortDots ? shortenDottedString(fieldName) : fieldName) + ' from field_name.tsx';
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
