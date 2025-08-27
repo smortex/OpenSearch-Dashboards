@@ -39,6 +39,16 @@ test('FieldName renders a string field by providing fieldType and fieldName', ()
   expect(component).toMatchSnapshot();
 });
 
+test('FieldName renders a string field by providing fieldType, fieldName and fullName', () => {
+  const fieldMapping = {
+    fullName: 'Full Name',
+  };
+  const component = render(
+    <FieldName fieldType="string" fieldName="test" fieldMapping={fieldMapping} />
+  );
+  expect(component).toMatchSnapshot();
+});
+
 test('FieldName renders a number field by providing a field record, useShortDots is set to false', () => {
   const component = render(<FieldName fieldName={'test.test.test'} fieldType={'number'} />);
   expect(component).toMatchSnapshot();

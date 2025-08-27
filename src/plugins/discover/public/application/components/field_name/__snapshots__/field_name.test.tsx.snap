@@ -92,3 +92,34 @@ exports[`FieldName renders a string field by providing fieldType and fieldName 1
   </div>
 </div>
 `;
+
+exports[`FieldName renders a string field by providing fieldType, fieldName and fullName 1`] = `
+<div
+  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+>
+  <div
+    class="euiFlexItem euiFlexItem--flexGrowZero"
+  >
+    <span
+      class="euiToken euiToken--euiColorVis1 euiToken--square euiToken--light euiToken--small osdFieldIcon"
+    >
+      <span
+        aria-label="String field"
+        data-euiicon-type="tokenString"
+        title="String field"
+      />
+    </span>
+  </div>
+  <div
+    class="euiFlexItem eui-textTruncate"
+  >
+    <span
+      class="euiToolTipAnchor eui-textTruncate"
+    >
+      <span>
+        Full Name
+      </span>
+    </span>
+  </div>
+</div>
+`;
